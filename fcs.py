@@ -43,9 +43,7 @@ def destuffed(data):
 			a += 1
 	return data
 	
-def main(msg_complete):
-
-	print "Teste de CRC"
+def crc_test(msg_complete):
 
 	msg =  msg_complete[1:-3] #[0x42, 0x7E, 0x00, 0xFD, 0x7D, 0x02, 0x31, 0x02] # 0xD2C6
 		
@@ -59,13 +57,13 @@ def main(msg_complete):
 
 	if hex(crc) == hex(crc_expected):
 		print "Valid CRC"
+		return 
 	else:
 		print "UNVALID CRC"
-
-	pass
+		return 
 
 if __name__ == '__main__':
 	
 	msg_complete = [0x7E, 0x42, 0x7D, 0x5E, 0x00, 0xFD, 0x7D, 0x5D, 0x02, 0x31, 0x02, 0xC6, 0xD2, 0x7E]
 	
-	main(msg_complete)
+	crc_test(msg_complete)
