@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-"""
-fcs.py
-
-Created by Rafael Jegundo on 2011-04-12.
-Copyright (c) 2011 __MyCompanyName__. All rights reserved.
-"""
-
 
 def calc_crc(crc, b):
 	
@@ -21,9 +14,12 @@ def calc_crc(crc, b):
 			crc = crc << 1
 	
 	return crc & 0xffff
+	
 
 def conector(a):
+	
 	return a[1]*256 + a[0]
+	
 
 def destuffed(data):
 
