@@ -85,9 +85,13 @@ print 'taosch1', conector(xmesh_msg[31:33])
 print 'ax', conector(xmesh_msg[33:35])
 print 'ay', conector(xmesh_msg[35:37])
 
+
+
 ## Converting payload data to real-world units
 
+print
 print 'Converting payload data to real-world units'
+print
 
 ## Voltage
 
@@ -99,12 +103,8 @@ print 'O valor da bateria e',BV_calc, 'Volts'
 ##CALCULO DA HUMIDADE E TEMPERATURA
 humid_medida= conector(xmesh_msg[13:15])
 humtemp_medida = conector(xmesh_msg[15:17])
-print humtemp_medida
 humtemp_calc = -38.4 + (0.0098*humtemp_medida)
 print 'O valor da temperatura e', humtemp_calc,'C'
-
-
-print humid_medida
 humid_calc=(0.0098 * humtemp_medida - 63.4)*(0.01+0.00008*humid_medida)-4 + (0.0405*humid_medida) - (0.0000028*humid_medida*humid_medida)
 print 'O valor da humidade e', humid_calc,'%'
 
@@ -117,20 +117,32 @@ aceleracao_y= 1-((500 - valormedido_y)/float(50))
 print 'O valor da aceleracao segundo o eixo do x e', aceleracao_y,'g'
 
 ## CALCULO DA PRESSAO E DO PRTEMP
-C1=25559
-C2=1992
-C3=783
-C4=698
-C5=1054
-C6=24
+C1= (conector(xmesh_msg[17:19]) >> 1)
+C2= (((conector(xmesh_msg[21:23]) & 0x3F )<< 6)) + (conector(xmesh_msg[23:25]) & 0x3F)
+C3= (conector(xmesh_msg[23:25]) >> 6)
+C4= (conector(xmesh_msg[21:23]) >> 6)
+C5= ((conector(xmesh_msg[17:19]) & 1) << 10) + (conector(xmesh_msg[19:21]) >> 6)
+C6= (conector(xmesh_msg[19:21]) & 0x3F)
 prtemp_medido=conector(xmesh_msg[25:27])
 pressao_medido=conector(xmesh_msg[27:29])
 UTI= (8 * C5) + 20224
 dT= prtemp_medido - UTI
 prtemp_calc= (200 + (dT * (C6+50)/float(1024)))/float(10)
-print ' O valor do prtemp e', prtemp_calc,'C'
-OFF= (C2*4 +((C4-512)*dT))/float(4096)
+print 'O valor do prtemp e', prtemp_calc,'C'
+OFF= ((C2*4) +(((C4-512)*dT))/float(4096))
 SENS= (C1 + (C3*dT)/float(1024))+ 24576
-X=((SENS*(pressao_medido-7168))/float(4096)) - OFF
-pressao_calc= X*(100/float(32))+ (250*100)
+X=SENS*((pressao_medido-7168)/float(16384)) - OFF
+print X
+pressao_calc= (X*(100/float(32))+ (250*100))/100
 print 'O valor da pressao e', pressao_calc,'milibar'
+
+# Falta corrigir esta parte
+
+"""
+## CALCULO DA LUMINOSIDADE (Ainda em construcao)
+taosch0_bin=hex(eval(conector(xmesh_msg[29:31])))
+taosch1_bin=hex(conector(xmesh_msg[31:33]))
+taosch0_bin_1=taosch0_bin & 0xFF
+taosch1_bin_2=taosch1_bin & bin(11111111)
+print taosch0_bin_1
+"""
