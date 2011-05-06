@@ -1,0 +1,9 @@
+import usb_import
+
+
+startListening()
+
+while True
+    getMessage()
+    updateTags()
+    
