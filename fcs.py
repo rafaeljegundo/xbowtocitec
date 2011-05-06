@@ -53,10 +53,10 @@ def crc_test(msg_complete):
 
 	if hex(crc) == hex(crc_expected):
 		print "Valid CRC"
-		return 
+		return True
 	else:
 		print "UNVALID CRC"
-		return 
+		return False
 
 if __name__ == '__main__':
 	
