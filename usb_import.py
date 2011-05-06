@@ -6,7 +6,7 @@ import sys
 
 # aceder à porta
 ser = serial.Serial()
-ser.port = 3 #Pode variar entre PC's. 4 -> COM5. 3 -> COM4
+ser.port = 3
 ser.baudrate = 57600
 
 if ser.isOpen():
@@ -54,5 +54,5 @@ while 1:
         ser.close()
         d.close()
         sys.exit()
-    """
-
+    
+"""
