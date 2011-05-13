@@ -1,8 +1,13 @@
-import OpenOPC
 from fcs import conector, destuffed
+import time
+from random import random
 
-opc = OpenOPC.client()
-opc.connect('Citect.OPC.1')
+try:
+	import OpenOPC
+	opc = OpenOPC.client()
+	opc.connect('Citect.OPC.1')
+except:
+	print "Can't connect to OPC Server"
 
 tagsMapping = {"Humidade":"13:15"} # tag -> index on the msg like 1:2
 
@@ -17,7 +22,17 @@ def updateTags(msg):
     humid_medida= conector(msg[13:15])
     humtemp_medida = conector(msg[15:17])
     humtemp_calc = -38.4 + (0.0098*humtemp_medida)
-    hum =(0.0098 * humtemp_medida - 63.4)*(0.01+0.00008*humid_medida)-4 + (0.0405*humid_medida) - (0.0000028*humid_medida*humid_medida)
+    hum = (0.0098 * humtemp_medida - 63.4)*(0.01+0.00008*humid_medida)-4 + (0.0405*humid_medida) - (0.0000028*humid_medida*humid_medida)
     print hum
     print opc.write(('Humidade',int(hum)))
     return
+
+def main():
+	print "testing"
+	while True:
+		time.sleep(1)
+		hum = random()*100
+		print opc.write(('Humidade',int(hum))
+		
+if __name__ == '__main__':
+	main()
