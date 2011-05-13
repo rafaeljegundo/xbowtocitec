@@ -30,11 +30,16 @@ def updateTags(msg):
 def main():
 	print "testing"
 	tagname = 'Humidade' # Alterar para tag do sistema
-	tagrange = 100 # Alterar para máximo da tag no sistema
+	tagrange = 100 # Alterar para maximo da tag no sistema
 	while True:
-		time.sleep(1)
-		hum = random()*tagrange
-		print opc.write((tagname,int(hum))
-		
-if __name__ == '__main__':
+		try:
+			time.sleep(1)
+			hum = random()*tagrange
+			print opc.write((tagname,int(hum)))
+		except KeyboardInterrupt: 
+			print "Bye" 
+			break
+	pass
+	
+if __name__ == "__main__": 
 	main()
