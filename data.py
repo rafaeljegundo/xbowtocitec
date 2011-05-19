@@ -9,10 +9,7 @@ data is the captured message. Example: {7E}{42}{7D}{5E}{00}{0B}{7D}{5D}{25}{00}{
 {E2}{FF}{00}{00}{C1}{01}{C3}{01}{2B}{F8}{7E}
 """
 
-data = "{7E}{42}{7D}{5E}{00}{0B}{7D}{5D}{25}{00}{00}{A4}{13}{00}{00}{33}{85}{86}\
-{00}{00}{98}{01}{84}{06}{4C}{18}{AF}{C7}{98}{07}{9F}{AE}{C8}{C3}{51}{71}{FD}{44}\
-{E2}{FF}{00}{00}{C1}{01}{C3}{01}{2B}{F8}{7E}"
-
+data = "{7E}{42}{7D}{5E}{00}{0B}{7D}{5D}{25}{00}{00}{9A}{13}{00}{00}{33}{85}{86}{00}{00}{94}{01}{47}{06}{3E}{1A}{B0}{B5}{98}{D1}{61}{AF}{3B}{BA}{54}{6D}{18}{47}{DE}{FF}{B8}{FF}{C1}{01}{C2}{01}{5D}{81}{7E}"
 # Converting the string to a more treatable format
 
 data = split(data[1:len(data)-1],'}{')
@@ -139,10 +136,23 @@ print 'O valor da pressao e', pressao_calc,'milibar'
 # Falta corrigir esta parte
 
 """
-## CALCULO DA LUMINOSIDADE (Ainda em construcao)
-taosch0_bin=hex(eval(conector(xmesh_msg[29:31])))
-taosch1_bin=hex(conector(xmesh_msg[31:33]))
-taosch0_bin_1=taosch0_bin & 0xFF
-taosch1_bin_2=taosch1_bin & bin(11111111)
-print taosch0_bin_1
+## CALCULO DA LUMINOSIDADE (Ainda em desenvolvimento)
+
+taosch0_bin=(conector(xmesh_msg[29:31]))& 0b11111111
+taosch1_bin=(conector(xmesh_msg[31:33]))& 0b11111111
+print taosch0_bin
+print taosch1_bin
+v=taosch0_bin & 0b10000000 >>7
+c=taosch0_bin & 0b01110000 >>4
+s=taosch0_bin & 0b00001111
+v1= taosch1_bin & 0b10000000 >>7
+c1= taosch1_bin & 0b01110000 >>4
+s1= taosch1_bin & 0b00001111
+adccount0=(16.5*((2^c)-1))+(s*(2^c))
+adccount1=(16.5*((2^c1)-1))+(s1*(2^c1))
+print adccount0
+print adccount1
+exponencial=exp(-3.13*(adccount1/adccount0))
+lightlevel=(adccount0*0.46*exponencial)
+print 'O valor da iluminancia e', lightlevel,'lux'
 """
