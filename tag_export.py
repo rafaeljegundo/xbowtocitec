@@ -26,6 +26,8 @@ tagsMapping = {	'Voltage':"11:13", \
 	} # tag -> index on the msg like 1:2
 """
 
+nodeList = []
+
 class Message:
 	
 	def __init__(self,msg):
@@ -35,13 +37,17 @@ class Message:
 
 		# Destuffing message -> Replacing encrypted 7E
         msg = destuffed(msg)
-
-		# Removing xmesh Header
+		
+		# Removing xmesh Header 
 		msg = msg[6:-2]
-
+		
 		# Converting data
 		
-        # Humidade
+		self.node = conector(msg[2:4])
+		print "Confirm node mapping", self.node
+		
+		# Humidade	
+		
 		humid_medida = conector(msg[13:15])
 		humtemp_medida = conector(msg[15:17])
 		humtemp_calc = -38.4 + (0.0098*humtemp_medida)
@@ -64,7 +70,42 @@ class Message:
 		adccount1=(16.5*((2^c1)-1))+(s1*(2^c1))
 		self.light = (adccount0*0.46*exp(-3.13*(adccount1/adccount0)))
 			
-		self.data = {"Humidade": self.humidade, "Temperatura": self.temperatura, "Humidade": self.light}
+		# Pressure
+		C1= (conector(msg[17:19]) >> 1)
+		C2= (((conector(msg[21:23]) & 0x3F )<< 6)) + (conector(msg[23:25]) & 0x3F)
+		C3= (conector(msg[23:25]) >> 6)
+		C4= (conector(msg[21:23]) >> 6)
+		C5= ((conector(msg[17:19]) & 1) << 10) + (conector(msg[19:21]) >> 6)
+		C6= (conector(msg[19:21]) & 0x3F)
+		prtemp_medido=conector(msg[25:27])
+		pressao_medido=conector(msg[27:29])
+		UTI= (8 * C5) + 20224
+		dT= prtemp_medido - UTI
+		prtemp_calc= (200 + (dT * (C6+50)/float(1024)))/float(10)
+		print 'O valor do prtemp e', prtemp_calc,'C'
+		OFF= ((C2*4) +(((C4-512)*dT))/float(4096))
+		SENS= (C1 + (C3*dT)/float(1024))+ 24576
+		X=SENS*((pressao_medido-7168)/float(16384)) - OFF
+		print X
+		pressao_calc= (X*(100/float(32))+ (250*100))/100
+		print 'O valor da pressao e', pressao_calc,'milibar'
+		self.pressure = pressao_calc
+		
+		
+		if self.node is not in nodeList:		
+			nodeList.append(node)
+		else:
+			nodeNumber = nodeList.index(self.node)
+		
+		node = "Node" + str(nodeNumber)
+		humidade = "Humidade" + str(nodeNumber)
+		temperatura = "Temperatura" + str(nodeNumber)
+		luminosidade = "Luminosidade" + str(nodeNumber)
+		pressao = "Pressao" + str(nodeNumber)
+		
+		# To improve: it writes de node in each iteration, without necessity
+		
+		self.data = {node: self.node, humidade: self.humidade, temperatura: self.temperatura, luminosidade: self.light, pressao: self.pressure}
 			
 		return
 		
@@ -109,3 +150,17 @@ def testing():
 	
 if __name__ == "__main__":
 	testing()
+
+
+"""
+To Be Done:
+
+Ler mensagem.
+Se nodo é novo -> Mapear, as in Node 1 = xpto432
+Se nodo é conhecido -> fazer update a tags respectivas, as in for Node 1, Temp1 = x, Hum1 = y, Lum = z
+
+
+Also:
+permitir usar tags com valores decimais
+
+"""
