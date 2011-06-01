@@ -1,16 +1,6 @@
-from fcs import conector, destuffed
-import time
-from random import random
-from math import exp
-
-try:
-        import OpenOPC
-        opc = OpenOPC.client()
-        opc.connect('Citect.OPC.1')
-except:
-        print "Can't connect to OPC Server"
-
 """
+Module for write the tags value on citect.
+
 tagsMapping = { 'Voltage':"11:13", \
         'Humidade':"13:15", \
         'humtemp':"15:17", \
@@ -27,12 +17,27 @@ tagsMapping = { 'Voltage':"11:13", \
         }
 """
 
+from fcs import conector, destuffed
+import time
+from random import random
+from math import exp
+
+try:
+        import OpenOPC
+        opc = OpenOPC.client()
+        opc.connect('Citect.OPC.1')
+except:
+        print "Can't connect to OPC Server"
+
+
 nodeList = []
 
 class Message:
         
         def __init__(self,msg):
 
+				# ADICIONAR MESSAGE TYPE
+				
                 # Removing 7E: Start and Stop bit
                 msg = msg[1:-1]
 
@@ -48,7 +53,6 @@ class Message:
                 # print "Confirm node mapping", self.node
                 
                 # Humidade      
-                
                 humid_medida = conector(msg[13:15])
                 humtemp_medida = conector(msg[15:17])
                 humtemp_calc = -38.4 + (0.0098*humtemp_medida)

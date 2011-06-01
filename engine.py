@@ -27,7 +27,7 @@ def main():
         while True:
             try:
                 msg = getMessage()
-                if len(msg) > 20 and crc_test(msg):
+                if len(msg) > 30 and crc_test(msg): # excludes heartbeats and Health messages.
                         print len(msg)
                         print map(hex,msg)
                         writeToLog(msg)

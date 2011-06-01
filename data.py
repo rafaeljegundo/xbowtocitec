@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""
+Code for testing crc, destuffing and data conversion to engineering units
+
+"""
+
 from string import split
 from fcs import calc_crc, conector, destuffed, crc_test
 
