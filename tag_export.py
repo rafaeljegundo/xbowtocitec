@@ -36,96 +36,107 @@ class Message:
         
         def __init__(self,msg):
 
-				# ADICIONAR MESSAGE TYPE
-				
+                f = open("msg_log",'w')
+                f.writelines(map(str,msg))
+                f.close
                 # Removing 7E: Start and Stop bit
                 msg = msg[1:-1]
 
                 # Destuffing message -> Replacing encrypted 7E
                 msg = destuffed(msg)
-                
-                # Removing xmesh Header 
-                msg = msg[6:-2]
-                
-                # Converting data
-                
-                self.node = conector(msg[2:4])
-                # print "Confirm node mapping", self.node
-                
-                # Humidade      
-                humid_medida = conector(msg[13:15])
-                humtemp_medida = conector(msg[15:17])
-                humtemp_calc = -38.4 + (0.0098*humtemp_medida)
-                self.humidade =(0.0098 * humtemp_medida - 63.4)*(0.01+0.00008*humid_medida)-4 + \
-                (0.0405*humid_medida) - (0.0000028*humid_medida*humid_medida)
 
-                # Temperatura
-                self.temperatura = -38.4 + (0.0098*humtemp_medida)
 
-                # Luminosidade
-                taosch0_bin = conector(xmesh_msg[29:31])
-				taosch1_bin = conector(xmesh_msg[31:33])
-				taosch0_bin_0=taosch0_bin & 0xFF
-				taosch1_bin_1=taosch1_bin & 0xFF
-				v0 = (taosch0_bin_0 & 0b10000000) >>7
-				c0 = (taosch0_bin_0 & 0b01110000) >>4
-				s0 = (taosch0_bin_0 & 0b00001111)
-				v1 = (taosch1_bin_1 & 0b10000000) >>7
-				c1 = (taosch1_bin_1 & 0b01110000) >>4
-				s1 = (taosch1_bin_1 & 0b00001111)
-				adccount0 = 16.5*((pow(2,c0)-1))+(s0*(pow(2,c0)))
-				adccount1 = 16.5*((pow(2,c1)-1))+(s1*(pow(2,c1)))
-				exponencial=exp(-3.13*(adccount1/adccount0))
-				self.light = (adccount0*0.46*exponencial)
+                if msg[3] == 0xb:
+                        print "msg 0xb"
+                        if len(msg) > 10:
+                                print "and bigger than 40"
+                                self.tipe = "normal"
+                
+                                # Removing xmesh Header 
+                                msg = msg[6:-2]
+                                
+                                # Converting data
+                                
+                                self.node = conector(msg[2:4])
+                                # print "Confirm node mapping", self.node
+                                
+                                # Humidade      
+                                humid_medida = conector(msg[13:15])
+                                humtemp_medida = conector(msg[15:17])
+                                humtemp_calc = -38.4 + (0.0098*humtemp_medida)
+                                self.humidade =(0.0098 * humtemp_medida - 63.4)*(0.01+0.00008*humid_medida)-4 + \
+                                (0.0405*humid_medida) - (0.0000028*humid_medida*humid_medida)
+
+                                # Temperatura
+                                self.temperatura = -38.4 + (0.0098*humtemp_medida)
+
+                                # Luminosidade
+                                taosch0_bin = conector(msg[29:31])
+                                taosch1_bin = conector(msg[31:33])
+                                taosch0_bin_0=taosch0_bin & 0xFF
+                                taosch1_bin_1=taosch1_bin & 0xFF
+                                v0 = (taosch0_bin_0 & 0b10000000) >>7
+                                c0 = (taosch0_bin_0 & 0b01110000) >>4
+                                s0 = (taosch0_bin_0 & 0b00001111)
+                                v1 = (taosch1_bin_1 & 0b10000000) >>7
+                                c1 = (taosch1_bin_1 & 0b01110000) >>4
+                                s1 = (taosch1_bin_1 & 0b00001111)
+                                adccount0 = 16.5*((pow(2,c0)-1))+(s0*(pow(2,c0)))
+                                adccount1 = 16.5*((pow(2,c1)-1))+(s1*(pow(2,c1)))
+                                exponencial=exp(-3.13*(adccount1/adccount0))
+                                self.light = (adccount0*0.46*exponencial)
+                                        
+                                # Pressure
+                                C1= (conector(msg[17:19]) >> 1)
+                                C2= (((conector(msg[21:23]) & 0x3F )<< 6)) + (conector(msg[23:25]) & 0x3F)
+                                C3= (conector(msg[23:25]) >> 6)
+                                C4= (conector(msg[21:23]) >> 6)
+                                C5= ((conector(msg[17:19]) & 1) << 10) + (conector(msg[19:21]) >> 6)
+                                C6= (conector(msg[19:21]) & 0x3F)
+                                prtemp_medido=conector(msg[25:27])
+                                pressao_medido=conector(msg[27:29])
+                                UTI= (8 * C5) + 20224
+                                dT= prtemp_medido - UTI
+                                prtemp_calc= (200 + (dT * (C6+50)/float(1024)))/float(10)
+                                OFF= ((C2*4) +(((C4-512)*dT))/float(4096))
+                                SENS= (C1 + (C3*dT)/float(1024))+ 24576
+                                X=SENS*((pressao_medido-7168)/float(16384)) - OFF
+                                pressao_calc= (X*(100/float(32))+ (250*100))/100
+                                self.pressure = pressao_calc
+                                
+                                try:
+                                        nodeNumber = nodeList.index(self.node)
+
+                                except ValueError:
+                                        nodeList.append(self.node)
+                                        nodeNumber = nodeList.index(self.node)
+
+                                node = "Node" + str(nodeNumber)
+                                humidade = "Humidade" + str(nodeNumber)
+                                temperatura = "Temperatura" + str(nodeNumber)
+                                luminosidade = "Luminosidade" + str(nodeNumber)
+                                pressao = "Pressao" + str(nodeNumber)
+                                
+                                # To improve: it writes de node in each iteration, without necessity
+                                
+                                self.data = {node: self.node, humidade: self.humidade, temperatura: self.temperatura, \
+                                                luminosidade: self.light, pressao: self.pressure}
+                else:
+                        self.tipe = "abnormal"
+                        return
                         
-                # Pressure
-                C1= (conector(msg[17:19]) >> 1)
-                C2= (((conector(msg[21:23]) & 0x3F )<< 6)) + (conector(msg[23:25]) & 0x3F)
-                C3= (conector(msg[23:25]) >> 6)
-                C4= (conector(msg[21:23]) >> 6)
-                C5= ((conector(msg[17:19]) & 1) << 10) + (conector(msg[19:21]) >> 6)
-                C6= (conector(msg[19:21]) & 0x3F)
-                prtemp_medido=conector(msg[25:27])
-                pressao_medido=conector(msg[27:29])
-                UTI= (8 * C5) + 20224
-                dT= prtemp_medido - UTI
-                prtemp_calc= (200 + (dT * (C6+50)/float(1024)))/float(10)
-                OFF= ((C2*4) +(((C4-512)*dT))/float(4096))
-                SENS= (C1 + (C3*dT)/float(1024))+ 24576
-                X=SENS*((pressao_medido-7168)/float(16384)) - OFF
-                pressao_calc= (X*(100/float(32))+ (250*100))/100
-                self.pressure = pressao_calc
-                
-                try:
-                        nodeNumber = nodeList.index(self.node)
-
-                except ValueError:
-                        nodeList.append(self.node)
-                        nodeNumber = nodeList.index(self.node)
-
-                node = "Node" + str(nodeNumber)
-                humidade = "Humidade" + str(nodeNumber)
-                temperatura = "Temperatura" + str(nodeNumber)
-                luminosidade = "Luminosidade" + str(nodeNumber)
-                pressao = "Pressao" + str(nodeNumber)
-                
-                # To improve: it writes de node in each iteration, without necessity
-                
-                self.data = {node: self.node, humidade: self.humidade, temperatura: self.temperatura, \
-				luminosidade: self.light, pressao: self.pressure}
-                        
-                return
+                return 
                 
                 
-def updateTags(message):
+def updateTags(msg):
 
         # Creating message object
-        msg = Message(message)
+     #   msg = Message(message)
 
         for tag in msg.data:
-                opc.write((tag,int(msg.data[tag])))
+                opc.write((tag,msg.data[tag]))
                 print tag, "written"
-
+                # NEXT: Add data to log
         return
 
 def testing():
@@ -172,13 +183,6 @@ if __name__ == "__main__":
 
 """
 To Be Done:
-
-Also:
-permitir usar tags com valores decimais -> Adaptar no Citect
-
-length do payload, apenas
-permitir valores decimais para humidade e temp
-adicionar msg type na class
-
+Log Messages
 
 """

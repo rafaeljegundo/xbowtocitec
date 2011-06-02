@@ -27,11 +27,10 @@ def main():
         while True:
             try:
                 msg = getMessage()
-                if len(msg) > 30 and crc_test(msg): # excludes heartbeats and Health messages.
-                        print len(msg)
-                        print map(hex,msg)
-                        writeToLog(msg)
-                        tag_export.updateTags(msg)
+                if crc_test(msg):
+                        msg = tag_export.Message(msg)
+                        if msg.tipe == "normal":
+                            tag_export.updateTags(msg)
             except KeyboardInterrupt:
                 print "Bye"
                 stop()

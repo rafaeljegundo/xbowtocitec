@@ -25,7 +25,7 @@ def destuffed(data):
 
 	a = 0
 
-	while a < len(data):
+	while a < len(data)-1:
 		if hex(data[a]) == hex(0x7D):
 			if hex(data[a+1]) == hex(0x5E):
 				data[a] = 0x7E
