@@ -63,17 +63,20 @@ class Message:
                 self.temperatura = -38.4 + (0.0098*humtemp_medida)
 
                 # Luminosidade
-                taosch0_bin=(conector(msg[29:31]))& 0b11111111
-                taosch1_bin=(conector(msg[31:33]))& 0b11111111
-                v=taosch0_bin & 0b10000000 >>7
-                c=taosch0_bin & 0b01110000 >>4
-                s=taosch0_bin & 0b00001111
-                v1= taosch1_bin & 0b10000000 >>7
-                c1= taosch1_bin & 0b01110000 >>4
-                s1= taosch1_bin & 0b00001111
-                adccount0=(16.5*((2^c)-1))+(s*(2^c))
-                adccount1=(16.5*((2^c1)-1))+(s1*(2^c1))
-                self.light = (adccount0*0.46*exp(-3.13*(adccount1/adccount0)))
+                taosch0_bin = conector(xmesh_msg[29:31])
+				taosch1_bin = conector(xmesh_msg[31:33])
+				taosch0_bin_0=taosch0_bin & 0xFF
+				taosch1_bin_1=taosch1_bin & 0xFF
+				v0 = (taosch0_bin_0 & 0b10000000) >>7
+				c0 = (taosch0_bin_0 & 0b01110000) >>4
+				s0 = (taosch0_bin_0 & 0b00001111)
+				v1 = (taosch1_bin_1 & 0b10000000) >>7
+				c1 = (taosch1_bin_1 & 0b01110000) >>4
+				s1 = (taosch1_bin_1 & 0b00001111)
+				adccount0 = 16.5*((pow(2,c0)-1))+(s0*(pow(2,c0)))
+				adccount1 = 16.5*((pow(2,c1)-1))+(s1*(pow(2,c1)))
+				exponencial=exp(-3.13*(adccount1/adccount0))
+				self.light = (adccount0*0.46*exponencial)
                         
                 # Pressure
                 C1= (conector(msg[17:19]) >> 1)
@@ -87,23 +90,18 @@ class Message:
                 UTI= (8 * C5) + 20224
                 dT= prtemp_medido - UTI
                 prtemp_calc= (200 + (dT * (C6+50)/float(1024)))/float(10)
-                #print 'O valor do prtemp e', prtemp_calc,'C'
                 OFF= ((C2*4) +(((C4-512)*dT))/float(4096))
                 SENS= (C1 + (C3*dT)/float(1024))+ 24576
                 X=SENS*((pressao_medido-7168)/float(16384)) - OFF
-                #print X
                 pressao_calc= (X*(100/float(32))+ (250*100))/100
-                #print 'O valor da pressao e', pressao_calc,'milibar'
                 self.pressure = pressao_calc
                 
                 try:
                         nodeNumber = nodeList.index(self.node)
-                        #print nodeNumber, nodeList
 
                 except ValueError:
                         nodeList.append(self.node)
                         nodeNumber = nodeList.index(self.node)
-                        #print nodeList, nodeNumber
 
                 node = "Node" + str(nodeNumber)
                 humidade = "Humidade" + str(nodeNumber)
