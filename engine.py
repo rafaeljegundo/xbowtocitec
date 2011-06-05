@@ -6,8 +6,10 @@ from fcs import crc_test
 f = open('msg_log.txt','w')
         
 def writeToLog(msg):
+	
     f.write(str(map(hex,msg)) + '\n')
-    return
+    
+	return
 
 def stop():
         f.close()
@@ -26,11 +28,13 @@ def getMessage():
 def main():
         while True:
             try:
+				rawmsg = msg[:]
                 msg = getMessage()
                 if crc_test(msg):
                         msg = tag_export.Message(msg)
                         if msg.tipe == "normal":
                             tag_export.updateTags(msg)
+							writeToLog(rawmsg)
             except KeyboardInterrupt:
                 print "Bye"
                 stop()

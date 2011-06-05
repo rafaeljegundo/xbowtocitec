@@ -24,7 +24,6 @@ data = map (lambda x: '0x' + x, data)
 
 data = map (eval, data)
 
-
 ## Verifing initial and final 0x7E
 
 if data[0] == 0x7E:
@@ -139,26 +138,21 @@ print X
 pressao_calc= (X*(100/float(32))+ (250*100))/100
 print 'O valor da pressao e', pressao_calc,'milibar'
 
-# Falta corrigir esta parte
 
-"""
-## CALCULO DA LUMINOSIDADE (Ainda em desenvolvimento)
+## Luminosity
 
 taosch0_bin=(conector(xmesh_msg[29:31]))& 0b11111111
 taosch1_bin=(conector(xmesh_msg[31:33]))& 0b11111111
-print taosch0_bin
-print taosch1_bin
-v=taosch0_bin & 0b10000000 >>7
-c=taosch0_bin & 0b01110000 >>4
-s=taosch0_bin & 0b00001111
-v1= taosch1_bin & 0b10000000 >>7
-c1= taosch1_bin & 0b01110000 >>4
-s1= taosch1_bin & 0b00001111
-adccount0=(16.5*((2^c)-1))+(s*(2^c))
-adccount1=(16.5*((2^c1)-1))+(s1*(2^c1))
-print adccount0
-print adccount1
+taosch0_bin_0=taosch0_bin & 0xFF
+taosch1_bin_1=taosch1_bin & 0xFF
+v0 = (taosch0_bin_0 & 0b10000000) >>7
+c0 = (taosch0_bin_0 & 0b01110000) >>4
+s0 = (taosch0_bin_0 & 0b00001111)
+v1 = (taosch1_bin_1 & 0b10000000) >>7
+c1 = (taosch1_bin_1 & 0b01110000) >>4
+s1 = (taosch1_bin_1 & 0b00001111)
+adccount0 = 16.5*((pow(2,c0)-1))+(s0*(pow(2,c0)))
+adccount1 = 16.5*((pow(2,c1)-1))+(s1*(pow(2,c1)))
 exponencial=exp(-3.13*(adccount1/adccount0))
-lightlevel=(adccount0*0.46*exponencial)
-print 'O valor da iluminancia e', lightlevel,'lux'
-"""
+lightlevel = (adccount0*0.46*exponencial)
+print lightlevel, "Lumens"
