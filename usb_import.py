@@ -3,11 +3,12 @@
 import time
 import signal
 import sys
-
 import serial
+
 ser = serial.Serial()
-ser.port = 3 # muda entre PCs
+ser.port = 3 # May change from system to system. Validate to be sure.
 ser.baudrate = 57600
+
 if ser.isOpen():
     ser.close()
     ser.open()
