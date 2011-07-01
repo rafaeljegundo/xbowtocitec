@@ -144,13 +144,13 @@ def testing():
         
         testmsg = map(eval,testmsg)
 
-        updateTags(testmsg)
+        msg = Message(testmsg)
+
+        updateTags(msg)
         
         print "Testing writing trough OPC with random values"
         
         tagrange = 60 # Maximum value for testing ALL tags. As integer.
-
-        msg = Message(testmsg)
 
         print "second test"
         print msg.data

@@ -17,19 +17,19 @@ def stop():
 	return
 
 def getMessage():
-		while True:
-				b = usb_import.ser.read(1)
-				if b == '\x7E':
-						msg = usb_import.decode(usb_import.listen(b))
-						return msg
-				else:
-						continue
+	while True:
+		b = usb_import.ser.read(1)
+		if b == '\x7E':
+			msg = usb_import.decode(usb_import.listen(b))
+			return msg
+		else:
+			continue
 								
 def main():
 		while True:
 			try:
-				rawmsg = msg[:]
 				msg = getMessage()
+				rawmsg = msg[:]
 				if crc_test(msg):
 						msg = tag_export.Message(msg)
 						if msg.tipe == "normal":
